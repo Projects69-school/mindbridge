@@ -36,10 +36,12 @@ const faqs = [
   ['จะทำอย่างไรหากต้องการความช่วยเหลือทันที?','ติดต่อผู้ใหญ่ที่ไว้วางใจหรือหน่วยงานฉุกเฉินโดยตรง ปุ่มความช่วยเหลือเร่งด่วนแสดงช่องทางติดต่อ'],
 ];
 
-export function publicHeader(path) {
+export function publicHeader(path, demoOnly = false) {
   return `<header class="site-header"><div class="site-nav container">
     ${brand()}<nav id="public-menu" aria-label="เมนูเว็บไซต์"><a href="/" ${path==='/'?'aria-current="page"':''}>หน้าหลัก</a><a href="/about">เกี่ยวกับเรา</a><a href="/#features">ฟีเจอร์</a><a href="/innovation">นวัตกรรม</a><a href="/privacy">ความปลอดภัย</a></nav>
-    <div class="nav-actions"><a class="login-link" href="/login">เข้าสู่ระบบ</a><a class="btn btn-primary header-start" href="/register">เริ่มต้นใช้งาน</a><button class="icon-btn public-menu-toggle" type="button" aria-expanded="false" aria-controls="public-menu" data-public-menu aria-label="เมนู">${icon('menu')}</button></div>
+    <div class="nav-actions">${demoOnly
+      ? '<a class="btn btn-primary" href="/demo">ทดลองใช้</a>'
+      : '<a class="login-link" href="/login">เข้าสู่ระบบ</a><a class="btn btn-primary header-start" href="/register">เริ่มต้นใช้งาน</a>'}<button class="icon-btn public-menu-toggle" type="button" aria-expanded="false" aria-controls="public-menu" data-public-menu aria-label="เมนู">${icon('menu')}</button></div>
   </div></header>`;
 }
 
@@ -55,14 +57,16 @@ function ladderPreview() {
   return `<div class="public-ladder">${ladder.map(([en,th,copy,symbol])=>`<article><span class="icon-tile">${icon(symbol)}</span><div><small lang="en">${en}</small><h3>${th}</h3><p>${copy}</p></div></article>`).join('')}</div>`;
 }
 
-function landing() {
+function landing(demoOnly) {
   return `<section class="landing-hero container">
     <div class="hero-copy">
       <p class="hero-kicker"><span></span> สะพานใจ เชื่อมครู เชื่อมนักเรียน</p>
       <h1>บางความรู้สึก<br>พูดออกมายาก<br><em>แต่ไม่จำเป็นต้อง<br>เก็บไว้คนเดียว</em></h1>
       <p class="hero-desc">MindBridge พื้นที่เชื่อมโยงความรู้สึกระหว่างนักเรียนกับครู เพื่อให้ทุกการขอความช่วยเหลือเริ่มต้นได้ง่ายขึ้น</p>
-      <div class="hero-actions"><a class="btn btn-primary" href="/register">เริ่มต้นใช้งาน</a><a class="btn btn-secondary" href="/demo">${icon('play',16)} ทดลองใช้งานระบบ</a></div>
-      <p class="hero-privacy">${icon('lock',16)} เริ่มต้นได้ตามความพร้อม ข้อมูลที่แชร์เลือกได้เอง</p>
+      <div class="hero-actions">${demoOnly
+        ? `<a class="btn btn-primary" href="/demo">${icon('play',16)} ทดลองใช้งานระบบ</a><a class="btn btn-secondary" href="/innovation">รู้จักนวัตกรรม</a>`
+        : `<a class="btn btn-primary" href="/register">เริ่มต้นใช้งาน</a><a class="btn btn-secondary" href="/demo">${icon('play',16)} ทดลองใช้งานระบบ</a>`}</div>
+      <p class="hero-privacy">${icon('lock',16)} ${demoOnly ? 'ทดลองได้ทันทีด้วยบัญชีสมมติ กรุณาใช้ข้อมูลสมมติเท่านั้น' : 'เริ่มต้นได้ตามความพร้อม ข้อมูลที่แชร์เลือกได้เอง'}</p>
     </div>
     <figure class="hero-figure"><img src="/assets/bridge.svg" alt="นักเรียนและครูหันเข้าหากันบนสะพานสีลาเวนเดอร์" width="690" height="540"><figcaption><span class="caption-heart">${icon('heart',18)}</span><span>ทุกเรื่องราวมีคนพร้อมรับฟัง</span></figcaption></figure>
   </section>
@@ -70,8 +74,8 @@ function landing() {
   <section id="features" class="container content-section"><header class="section-lead"><span class="eyebrow">จากความรู้สึกสู่การดูแล</span><h2>การขอความช่วยเหลือ<br>เริ่มได้หลายแบบ</h2><p>ความกังวลว่าจะถูกตัดสินหรือความไม่แน่ใจว่าจะเริ่มคุยอย่างไร ทำให้เรื่องที่อยากเล่าค้างอยู่ในใจ MindBridge ช่วยให้นักเรียนเลือกก้าวแรกได้ด้วยตัวเอง</p></header><div class="grid-3">${featureCards()}</div></section>
   <section id="trust" class="container content-section ladder-section"><div class="ladder-panel"><header class="section-lead"><span class="eyebrow">นวัตกรรมหลัก</span><h2>Trust Ladder</h2><p>เปิดใจตามความพร้อมของตนเอง เลือกได้อย่างอิสระ ข้ามระดับได้ และหยุดเมื่อพร้อม</p></header>${ladderPreview()}</div></section>
   <section class="container content-section"><header class="section-lead"><span class="eyebrow">ประสบการณ์การใช้งาน</span><h2>พื้นที่ของนักเรียน<br>และพื้นที่ของคุณครู</h2></header><div class="grid-2">
-    <article class="card feature-card"><span class="icon-tile pink">${icon('smile',26)}</span><h3>สำหรับนักเรียน</h3><p>สำรวจอารมณ์ เก็บบันทึกส่วนตัว และขอให้ครูรับฟังเท่าที่พร้อม</p><a class="btn btn-secondary" href="/login/student">เข้าสู่พื้นที่นักเรียน</a></article>
-    <article class="card feature-card"><span class="icon-tile mint">${icon('school',26)}</span><h3>สำหรับครู</h3><p>รับคำขอ ฟังด้วยความเข้าใจ และติดตามเฉพาะนักเรียนที่มีสิทธิ์ดูแล</p><a class="btn btn-secondary" href="/login/teacher">เข้าสู่พื้นที่ครู</a></article>
+    <article class="card feature-card"><span class="icon-tile pink">${icon('smile',26)}</span><h3>สำหรับนักเรียน</h3><p>สำรวจอารมณ์ เก็บบันทึกส่วนตัว และขอให้ครูรับฟังเท่าที่พร้อม</p>${demoOnly ? '<button class="btn btn-secondary" type="button" data-demo-role="student">ทดลองเป็นนักเรียน</button>' : '<a class="btn btn-secondary" href="/login/student">เข้าสู่พื้นที่นักเรียน</a>'}</article>
+    <article class="card feature-card"><span class="icon-tile mint">${icon('school',26)}</span><h3>สำหรับครู</h3><p>รับคำขอ ฟังด้วยความเข้าใจ และติดตามเฉพาะนักเรียนที่มีสิทธิ์ดูแล</p>${demoOnly ? '<button class="btn btn-secondary" type="button" data-demo-role="teacher">ทดลองเป็นครู</button>' : '<a class="btn btn-secondary" href="/login/teacher">เข้าสู่พื้นที่ครู</a>'}</article>
   </div></section>
   <section class="container content-section faq-section"><header class="section-lead"><span class="eyebrow">ก่อนเริ่มต้น</span><h2>คำถามที่พบบ่อย</h2></header><div class="stack">${faqs.map(([title,copy])=>`<details class="card"><summary>${title}</summary><p>${copy}</p></details>`).join('')}</div></section>`;
 }
@@ -155,8 +159,8 @@ function about() {
   return `<article class="container content-section case-study"><header class="section-lead"><span class="eyebrow">เกี่ยวกับโครงงาน</span><h1>สะพานใจ เชื่อมครู<br>เชื่อมนักเรียน</h1><p>ทุกความรู้สึกมีความหมาย ทุกเรื่องราวมีคนพร้อมรับฟัง</p></header><div class="grid-2 about-content"><div class="card feature-card"><h2>ที่มาและวัตถุประสงค์</h2><p>MindBridge เกิดจากแนวคิดว่าการเริ่มต้นสื่อสารเป็นส่วนสำคัญของการขอความช่วยเหลือ โครงงานมุ่งส่งเสริมการเข้าใจอารมณ์ ลดอุปสรรคในการเริ่มคุย และเพิ่มทางเลือกในการรับฟังและติดตามในโรงเรียน</p><a class="btn btn-secondary" href="/innovation">รู้จักนวัตกรรม</a></div><img width="690" height="540" src="/assets/bridge.svg" alt="ภาพประกอบสะพานใจ"></div></article>`;
 }
 
-export function renderPublic(path) {
-  if (path === '/') return landing();
+export function renderPublic(path, demoOnly = false) {
+  if (path === '/') return landing(demoOnly);
   if (path === '/login') return loginChoice();
   if (path.startsWith('/login/')) {
     const role = path.split('/')[2];

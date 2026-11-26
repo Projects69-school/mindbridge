@@ -48,6 +48,7 @@ if (!demoStages[demoIndex] || demoIndex === null) demoIndex = null;
 let renderCount = 0;
 let unread = 0;
 let notifications = [];
+let demoOnly = false;
 const privatePath = () => /^\/(student|teacher|admin)(\/|$)/.test(location.pathname);
 
 function locationAfterAuth(user) {
@@ -102,13 +103,15 @@ async function render({ focus = false } = {}) {
   const id = ++renderCount;
   const path = location.pathname.replace(/\/+$/,'') || '/';
   const role = path.split('/')[1];
+  const signIn = demoOnly ? '/demo' : '/login/' + role;
+  if (demoOnly && /^\/(login(?:\/|$)|register$)/.test(path)) return navigate('/demo', { replace:true });
   let module;
   let main;
   const privatePage = Object.hasOwn(navigation,role);
   const modulePath = role === 'student' ? path : path + location.search;
   if (privatePage) {
     const user = currentUser();
-    if (!user) return navigate('/login/' + role, { replace:true });
+    if (!user) return navigate(signIn, { replace:true });
     if (user.role !== role) return navigate(locationAfterAuth(user), { replace:true });
     try {
       module = role === 'student' ? await import('./student.js') : await import('./teacher.js');
@@ -117,16 +120,16 @@ async function render({ focus = false } = {}) {
     } catch (error) {
       if (error.status === 401) {
         setUser(null);
-        return navigate('/login/' + role, { replace:true });
+        return navigate(signIn, { replace:true });
       }
       console.error(error);
       main = pageError(error.message);
     }
   } else {
-    main = renderPublic(path);
+    main = renderPublic(path, demoOnly);
   }
   if (id !== renderCount) return;
-  app.innerHTML = privatePage ? shell(currentUser(),path,main) : publicHeader(path) + `<main id="main" tabindex="-1">${main}</main>` + publicFooter();
+  app.innerHTML = privatePage ? shell(currentUser(),path,main) : publicHeader(path, demoOnly) + `<main id="main" tabindex="-1">${main}</main>` + publicFooter();
   document.body.classList.toggle('workspace-body',privatePage);
   applyPreferences(privatePage ? currentUser() : null);
   document.title = (privatePage ? navigation[role].find(([key])=>path.split('/')[2]===key)?.[2] + ' · ' : '') + 'MindBridge · สะพานใจ';
@@ -345,6 +348,7 @@ setInterval(() => { void readNotifications(); }, 8000);
 
 try {
   const session = await api('/session');
+  demoOnly = session.demoOnly === true;
   setUser(session.user);
 } catch { setUser(null); }
 await render({ focus:!!location.hash });

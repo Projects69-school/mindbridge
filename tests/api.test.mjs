@@ -15,12 +15,12 @@ before(async () => {
 });
 after(async () => { if (app) await new Promise((resolve) => app.server.close(resolve)); });
 
-function browser() {
+function browser(baseURL = base) {
   const cookies = new Map();
   return async (path, method = 'GET', body = undefined, status = 200, options = {}) => {
     const headers = { cookie: [...cookies].map(([key, value]) => `${key}=${value}`).join('; '), ...options.headers };
     if (body !== undefined) headers['Content-Type'] = 'application/json';
-    const response = await fetch(`${base}${path}`, { method, headers, redirect: 'manual', body: body === undefined ? undefined : JSON.stringify(body) });
+    const response = await fetch(`${baseURL}${path}`, { method, headers, redirect: 'manual', body: body === undefined ? undefined : JSON.stringify(body) });
     for (const header of response.headers.getSetCookie()) {
       const [pair] = header.split(';');
       const [key, value] = pair.split('=');
@@ -37,6 +37,39 @@ function browser() {
 const get = async (client, path, status = 200) => (await client(path, 'GET', undefined, status)).data;
 const post = async (client, path, body, status = 200) => (await client(path, 'POST', body, status)).data;
 const patch = async (client, path, body, status = 200) => (await client(path, 'PATCH', body, status)).data;
+
+test('a hosted demo uses secure cookies, isolates browsers, and disables local accounts', async (t) => {
+  const origin = 'https://mindbridge-demo.test';
+  const hosted = await startServer({
+    port: 0, demoOnly: true, secureCookie: true, origin,
+    dbPath: 'unused/demo-must-not-open.sqlite', inviteCode, adminEmail, adminPassword: credential,
+  });
+  t.after(() => new Promise(resolve => hosted.server.close(resolve)));
+  assert.equal(hosted.config.dbPath, ':memory:');
+  assert.equal(hosted.store.get('SELECT count(*) AS total FROM users').total, 0);
+  const url = `http://127.0.0.1:${hosted.server.address().port}`;
+  const first = browser(url);
+  const second = browser(url);
+  await first('/healthz', 'GET', undefined, 204);
+  await first('/healthz', 'HEAD', undefined, 204);
+  assert.equal((await first('/register', 'GET', undefined, 302)).response.headers.get('Location'), '/demo');
+  assert.equal((await first('/teacher/dashboard', 'GET', undefined, 302)).response.headers.get('Location'), '/demo');
+  assert.deepEqual(await get(first, '/api/session'), { user: null, demoOnly: true });
+  const request = { headers: { Origin: origin } };
+  await first('/api/login', 'POST', { role: 'admin', identifier: adminEmail, password: credential }, 403, request);
+  await first('/api/recover', 'POST', { role: 'student', identifier: 'someone@test.invalid' }, 403, request);
+  await first('/api/register', 'POST', { role: 'student', inviteCode }, 403, request);
+  await first('/api/demo', 'POST', { role: 'student' }, 403, { headers: { Origin: 'https://other.test' } });
+  const signIn = await first('/api/demo', 'POST', { role: 'student' }, 200, request);
+  assert.ok(signIn.response.headers.getSetCookie().every(value => /; Secure/.test(value)));
+  assert.equal(signIn.data.user.role, 'student');
+  const firstWorkspace = await get(first, '/api/workspace');
+  const secondSignIn = await second('/api/demo', 'POST', { role: 'student' }, 200, request);
+  assert.notEqual(secondSignIn.data.user.id, signIn.data.user.id);
+  await get(second, `/api/requests/${firstWorkspace.requests[0].id}`, 404);
+  await first('/api/demo', 'POST', { role: 'teacher' }, 200, request);
+  assert.equal((await get(first, '/api/workspace')).requests[0].id, firstWorkspace.requests[0].id);
+});
 
 test('demo routes authenticate and the full care workflow synchronizes between roles', async () => {
   const client = browser();

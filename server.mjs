@@ -62,20 +62,23 @@ const envConfig = () => ({
   dbPath: process.env.APP_DB || defaultDB,
   port: Number(process.env.APP_PORT ?? process.env.PORT ?? 4173),
   host: process.env.APP_HOST || '127.0.0.1',
-  origin: process.env.APP_ORIGIN || '',
+  origin: process.env.APP_ORIGIN || process.env.RENDER_EXTERNAL_URL || '',
   secureCookie: process.env.APP_SECURE_COOKIE === '1',
   inviteCode: process.env.APP_INVITE_CODE || '',
   adminEmail: process.env.APP_ADMIN_EMAIL || '',
   adminPassword: process.env.APP_ADMIN_PASSWORD || '',
   schoolName: process.env.APP_SCHOOL_NAME || '',
   allowDemo: process.env.APP_ALLOW_DEMO !== '0',
+  demoOnly: process.env.APP_DEMO_ONLY === '1',
 });
 
-async function servePage(request, response, url, user) {
+async function servePage(request, response, url, user, demoOnly) {
   if (!['GET', 'HEAD'].includes(request.method)) throw new HttpError(405, 'หน้านี้ไม่รองรับการทำรายการนี้');
   const role = /^\/(student|teacher|admin)(?:\/|$)/.exec(url.pathname)?.[1];
-  if (role && user?.role !== role) {
-    const page = user ? `/${user.role}/dashboard` : `/login/${role}`;
+  const realAuthPage = /^\/(?:login(?:\/|$)|register\/?$)/.test(url.pathname);
+  const redirectToDemo = demoOnly && (realAuthPage || (role && !user));
+  if (redirectToDemo || (role && user?.role !== role)) {
+    const page = redirectToDemo ? '/demo' : (user ? `/${user.role}/dashboard` : `/login/${role}`);
     response.writeHead(302, { Location: page, 'Cache-Control': 'no-store' });
     response.end();
     return;
@@ -100,6 +103,9 @@ async function servePage(request, response, url, user) {
 export function createApp(options = {}) {
   const config = { ...envConfig(), ...options };
   if (config.origin) config.origin = new URL(config.origin).origin;
+  if (config.demoOnly) {
+    Object.assign(config, { dbPath: ':memory:', allowDemo: true, inviteCode: '', adminEmail: '', adminPassword: '' });
+  }
   const store = createStore(config.dbPath);
   let school;
   try { school = bootstrap(store, config); } catch (error) { store.close(); throw error; }
@@ -112,10 +118,14 @@ export function createApp(options = {}) {
     response.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; media-src 'self' blob:; frame-ancestors 'none'; form-action 'self'; base-uri 'none'; object-src 'none'");
     try {
       const url = new URL(request.url, 'http://localhost');
+      if (url.pathname === '/healthz' && ['GET', 'HEAD'].includes(request.method)) {
+        response.writeHead(204, { 'Cache-Control': 'no-store' }).end();
+        return;
+      }
       const cookies = getCookies(request.headers.cookie);
       const user = getSession(store, cookies.mb_session);
       if (!url.pathname.startsWith('/api/')) {
-        await servePage(request, response, url, user);
+        await servePage(request, response, url, user, config.demoOnly);
         return;
       }
       const [, , action, id, suffix, ...extra] = url.pathname.split('/');

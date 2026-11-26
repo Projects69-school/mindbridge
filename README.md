@@ -2,6 +2,18 @@
 
 MindBridge is a Thai-language school support prototype for the 2570 educational innovation competition. Students can start with a private check-in, choose what to share through Trust Ladder, and contact a teacher. The teacher can reply, arrange an appointment, and record a follow-up. Both roles see their permitted parts of the same workflow.
 
+## เปิดลิงก์ให้เพื่อนทดลองใช้
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2FProjects69-school%2Fmindbridge)
+
+1. กด **Deploy to Render** แล้วลงชื่อเข้า Render เชื่อม GitHub และอนุญาตให้เข้าถึง repo นี้
+2. ตรวจสอบว่าหน้า Blueprint แสดงบริการ `mindbridge-demo` ประเภท **Web Service** แผน **Free** แล้วกด Deploy
+3. เมื่อบริการขึ้น **Live** ให้คัดลอก URL `https://…onrender.com` ในหน้า Render แล้วส่งลิงก์ที่ลงท้ายด้วย `/demo` ให้เพื่อน ลิงก์นั้นเปิดจากเครื่องอื่นได้โดยไม่ต้องติดตั้ง Node.js
+
+ไฟล์ [`render.yaml`](render.yaml) ตั้งค่า Node.js 24 และเปิดเฉพาะบัญชีสาธิตสมมติ แต่ละเบราว์เซอร์มีข้อมูลสาธิตของตัวเอง และสามารถสลับเป็น **ฟ้า** หรือ **ครูพลอย** เพื่อทดลองขั้นตอนเดียวกันได้ ข้อมูลสาธิตจะเริ่มใหม่เมื่อเซิร์ฟเวอร์รีสตาร์ต แผนฟรีอาจใช้เวลาประมาณหนึ่งนาทีในการเปิดครั้งแรกหลังไม่ได้ใช้งาน โปรดใช้ข้อมูลสมมติเท่านั้น [ข้อจำกัดของแผนฟรี](https://render.com/docs/free)
+
+GitHub เก็บซอร์สโค้ด ส่วน GitHub Pages ให้บริการไฟล์เว็บแบบสแตติก MindBridge ต้องใช้ Node.js รัน API และ SQLite จึงใช้ Render แบบ Web Service สำหรับเวอร์ชันนี้ [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)
+
 ## Run locally
 
 Use Node.js 24 or later. The runtime has no npm dependencies, and the local demo needs no external accounts.
@@ -33,7 +45,7 @@ Demo personas are seeded automatically and isolated by a browser session cookie.
 | `server.mjs`, `api.mjs` | HTTP routes, cookie sessions, server-side authorization and input validation |
 | `db/001-initial.sql`, `db/store.mjs` | SQLite schema, transactional updates and fictional seed workspace |
 | `tests/` | API integration and Playwright browser tests |
-| `docs/screenshots/` | Fictional user screenshots captured from the running website |
+| `doc/screenshots/` | Fictional user screenshots captured from the running website |
 
 The application uses Node HTTP and SQLite for a self-contained demo. The browser UI uses native ES modules, CSS and SVG. App-level authorization filters records by account, school, assignment and conversation membership. SQLite foreign keys and transactions maintain relationships. Noto Sans Thai is bundled under the SIL Open Font License alongside its license text.
 

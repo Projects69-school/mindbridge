@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: mindbridge-demo
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: node scripts/check.mjs
+    startCommand: node server.mjs
+    healthCheckPath: /healthz
+    autoDeployTrigger: "off"
+    envVars:
+      - key: NODE_VERSION
+        value: "24.22.1"
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
+      - key: APP_HOST
+        value: "0.0.0.0"
+      - key: APP_SECURE_COOKIE
+        value: "1"
+      - key: APP_DEMO_ONLY
+        value: "1"

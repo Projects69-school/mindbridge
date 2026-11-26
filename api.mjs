@@ -216,7 +216,7 @@ const result = item => ({ item });
 
 function auth(ctx) {
   const { s, user, action, method, body, cookies, cookie, config, school } = ctx;
-  if (action === 'session' && method === 'GET') return { user: userView(s, user) };
+  if (action === 'session' && method === 'GET') return { user: userView(s, user), demoOnly: config.demoOnly };
   if (!['demo', 'login', 'register', 'logout', 'recover'].includes(action) || method !== 'POST') return undefined;
   function begin(account) {
     const newToken = token();
@@ -245,6 +245,7 @@ function auth(ctx) {
     expect(account, 'บัญชีสาธิตนี้ถูกปิดใช้งาน กรุณาเริ่มการสาธิตใหม่', 403);
     return begin(account);
   }
+  expect(!config.demoOnly, 'เว็บสาธิตนี้ใช้บัญชีนักเรียนและครูที่เป็นข้อมูลสมมติ', 403);
   const role = pick(body.role || 'student', action === 'register' ? roles : [...roles, 'admin']);
   if (action === 'register') {
     expect(configMatches(body.inviteCode ?? body.invitationCode, config.inviteCode), 'รหัสเชิญโรงเรียนไม่ถูกต้อง หรือโรงเรียนยังไม่เปิดรับสมัคร', 403);
