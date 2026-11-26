@@ -1,79 +1,102 @@
 # MindBridge · สะพานใจ เชื่อมครู เชื่อมนักเรียน
 
-MindBridge is a Thai-language school support prototype for the 2570 educational innovation competition. Students can start with a private check-in, choose what to share through Trust Ladder, and contact a teacher. The teacher can reply, arrange an appointment, and record a follow-up. Both roles see their permitted parts of the same workflow.
+MindBridge เป็นเว็บไซต์สาธิตโครงการนวัตกรรมการศึกษา สำหรับนำเสนอในงาน Innovative Award 2027 ของจุฬาลงกรณ์มหาวิทยาลัย นักเรียนสำรวจความรู้สึก เลือกวิธีเปิดใจ และขอความช่วยเหลือจากครูที่ไว้วางใจ ครูรับเรื่อง ตอบกลับ และนัดติดตามผลได้ในแท็บเดียวกัน
 
-## เปิดลิงก์ให้เพื่อนทดลองใช้
+> โหมดสาธิต — ใช้ข้อมูลสมมติเท่านั้น กรุณาไม่กรอกข้อมูลส่วนตัวหรือข้อมูลสุขภาพจริง
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2FProjects69-school%2Fmindbridge)
+## สิ่งที่ทดลองได้
 
-1. กด **Deploy to Render** แล้วลงชื่อเข้า Render เชื่อม GitHub และอนุญาตให้เข้าถึง repo นี้
-2. ตรวจสอบว่าหน้า Blueprint แสดงบริการ `mindbridge-demo` ประเภท **Web Service** แผน **Free** แล้วกด Deploy
-3. เมื่อบริการขึ้น **Live** ให้คัดลอก URL `https://…onrender.com` ในหน้า Render แล้วส่งลิงก์ที่ลงท้ายด้วย `/demo` ให้เพื่อน ลิงก์นั้นเปิดจากเครื่องอื่นได้โดยไม่ต้องติดตั้ง Node.js
-
-ไฟล์ [`render.yaml`](render.yaml) ตั้งค่า Node.js 24 และเปิดเฉพาะบัญชีสาธิตสมมติ แต่ละเบราว์เซอร์มีข้อมูลสาธิตของตัวเอง และสามารถสลับเป็น **ฟ้า** หรือ **ครูพลอย** เพื่อทดลองขั้นตอนเดียวกันได้ ข้อมูลสาธิตจะเริ่มใหม่เมื่อเซิร์ฟเวอร์รีสตาร์ต แผนฟรีอาจใช้เวลาประมาณหนึ่งนาทีในการเปิดครั้งแรกหลังไม่ได้ใช้งาน โปรดใช้ข้อมูลสมมติเท่านั้น [ข้อจำกัดของแผนฟรี](https://render.com/docs/free)
-
-GitHub เก็บซอร์สโค้ด ส่วน GitHub Pages ให้บริการไฟล์เว็บแบบสแตติก MindBridge ต้องใช้ Node.js รัน API และ SQLite จึงใช้ Render แบบ Web Service สำหรับเวอร์ชันนี้ [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)
-
-## Run locally
-
-Use Node.js 24 or later. The runtime has no npm dependencies, and the local demo needs no external accounts.
-
-```sh
-cd mindbridge
-node --env-file-if-exists=.env server.mjs
-```
-
-Open [http://127.0.0.1:4173](http://127.0.0.1:4173). Use `node --watch --env-file-if-exists=.env server.mjs` for live development. The server binds only to loopback by default. The local service initializes and migrates its SQLite database on startup.
-
-## Three-minute competition demo
-
-1. Open [การสาธิต](http://127.0.0.1:4173/demo) and choose **เริ่มการสาธิต** to follow the guide, or enter **ทดลองใช้งานในฐานะนักเรียน** for the dashboard.
-2. As **ฟ้า**, record เครียด and กังวล, explore the emotion wheel, and open **สะพานใจ**. Choose **SIGNAL**, select **อยากให้มีคนรับฟัง** and **ครูพลอย**, skip any optional explanation, review the shared information, and send.
-3. Use **สลับบัญชีสาธิต** to become **ครูพลอย**. Open the request, accept it, then write and send a reply. The teacher toolkit offers editable example phrases.
-4. Switch back to **ฟ้า**, read the reply and request a time under **นัดหมาย**. Switch to the teacher and confirm the booking. Add a follow-up under **ติดตามผล**.
-5. Switch to **ฟ้า** and open **เส้นทางการดูแล** to see the updated timeline. Use **เริ่มการสาธิตใหม่** in the account switcher to replace the browser's demo data with a clean fictional workspace.
-
-Demo personas are seeded automatically and isolated by a browser session cookie. The demo admin is under **ตัวเลือกผู้ดูแลโรงเรียน** on the demo page. A separate browser profile or private window starts a separate demo workspace.
-
-## Structure
-
-| Path | Role |
+| บทบาท | ฟีเจอร์ |
 | --- | --- |
-| `public/` | Thai browser interface, route shell, original SVG assets, and local Noto Sans Thai font |
-| `public/student*.js` | Student dashboard, emotions, wheel, journal, Trust Ladder and coordination tools |
-| `public/teacher.js` | Teacher and school administrator interfaces |
-| `server.mjs`, `api.mjs` | HTTP routes, cookie sessions, server-side authorization and input validation |
-| `db/001-initial.sql`, `db/store.mjs` | SQLite schema, transactional updates and fictional seed workspace |
-| `tests/` | API integration and Playwright browser tests |
-| `doc/screenshots/` | Fictional user screenshots captured from the running website |
+| นักเรียน | เช็กอินและดูประวัติอารมณ์ วงล้ออารมณ์ แบบสำรวจสุขภาวะ Trust Ladder บันทึกส่วนตัว ภาพวาดและเสียงชั่วคราว กิจกรรมดูแลใจ เลือกครูและส่งสัญญาณ ขอหรือเปลี่ยนนัด ติดตามความคืบหน้าและส่งความคิดเห็น |
+| คุณครู | ภาพรวมและคำขอ นักเรียนในความดูแล ข้อมูลที่ได้รับอนุญาต คู่มือการรับฟังและข้อความแนะนำ เวลาที่เปิดให้นัด แผนและบันทึกการดูแล นัดติดตามผล ส่งต่อจำลอง และรายงานภาพรวม |
+| ทั้งสองบทบาท | ข้อความสองทาง ปฏิทิน การแจ้งเตือน การตั้งค่าโปรไฟล์และการเข้าถึง การสลับบทบาท และการคืนข้อมูลชุดแรก |
 
-The application uses Node HTTP and SQLite for a self-contained demo. The browser UI uses native ES modules, CSS and SVG. App-level authorization filters records by account, school, assignment and conversation membership. SQLite foreign keys and transactions maintain relationships. Noto Sans Thai is bundled under the SIL Open Font License alongside its license text.
+## เริ่มใช้งานบนเครื่อง
 
-## Settings and separate local accounts
-
-Use `.env.example` as a reference. Optional variables include `APP_DB` (defaults to `data/mindbridge.sqlite`), `APP_PORT` (4173), `APP_HOST` (127.0.0.1) and `APP_ALLOW_DEMO` (set to 0 to disable demo sign-in).
-
-For testing registered accounts with fictional information, set a private `APP_INVITE_CODE` and create the first local administrator using `APP_ADMIN_EMAIL` and `APP_ADMIN_PASSWORD`. Open **สมัครสมาชิก** and use the same invite code. Students enter the workspace after signup. Teachers must be verified in **จัดการบัญชี** by the school administrator before signing in, and the administrator must assign the teacher to particular students. The password reset form records a request for the school administrator. There is no outbound email service.
-
-`APP_ORIGIN` sets the expected browser origin. `APP_SECURE_COOKIE=1` enables secure cookies when the service is behind an HTTPS proxy. Keep `.env` and SQLite data out of source control.
-
-## Checks and screenshots
+ใช้ Node.js 24 LTS และ npm โดยรองรับ Node.js 22.12 ขึ้นไปด้วย เปิดเทอร์มินัลในโฟลเดอร์โครงการแล้วรัน
 
 ```sh
-node scripts/check.mjs
-node --test tests/api.test.mjs
 npm install
-npx playwright install chromium
-node tests/browser.mjs
-node tests/admin-browser.mjs
+npm run dev
 ```
 
-The first two commands need only Node. Playwright can also use an installed Chrome (`APP_CHROME`) or a preinstalled Playwright module (`APP_PLAYWRIGHT`). The browser workflow test starts an isolated SQLite database in memory and creates fictional screenshot data through both accounts. It writes 2× PNG screenshots to `docs/screenshots/`. The separate admin/browser smoke test checks teacher and admin routes, teacher guidance drafts, a mobile teacher view and admin privacy boundaries.
+เปิด URL ที่ Vite แสดง โดยปกติคือ [http://127.0.0.1:5173/](http://127.0.0.1:5173/) จากหน้าหลักเลือก **ทดลองใช้งาน** แล้วเลือก **เข้าสู่โหมดนักเรียน** หรือ **เข้าสู่โหมดคุณครู**
 
-The `build` script checks all distributable sources and bundled assets. There is no transpilation step. To run this build on a local showcase computer, copy the project folder and start Node with the command above.
+ทดสอบไฟล์สำหรับเผยแพร่ด้วยคำสั่งต่อไปนี้
 
-## Privacy, safety and deployment scope
+```sh
+npm ci
+npm run build
+npm run preview
+```
 
-Use fictional information. The local app does not perform clinical screening or diagnosis, or send referrals or messages to external services. An authorized teacher can record a referral for human review. Urgent support directs the user to people and services outside this app. The medical emergency number in the prototype follows the [National Institute for Emergency Medicine](https://www.niems.go.th/th/Upload/File/255906101538474568_d2Qw9e18HslgFn47.pdf). Check school contacts and approved emergency procedures before an institutional pilot.
+ผลลัพธ์อยู่ใน `dist/` และมี `index.html` ที่ระดับบนสุด ส่วน `npm run preview` ใช้เปิดดูไฟล์เหล่านี้บนเครื่อง เมื่อเผยแพร่ขึ้น GitHub Pages แล้ว เว็บไซต์ใช้เพียงไฟล์สแตติกและเปิดได้จากเบราว์เซอร์โดยตรง
 
-An institutional deployment requires decisions about consent and parent/guardian authorization, safeguarding and incident response, encrypted storage and backups, account recovery, retention enforcement, and deployment monitoring. Test the deployment and review privacy and security before collecting student information. The local version does not configure Supabase/PostgreSQL, hosted realtime updates or database row-level security, external email and SMS, or a production monitoring service. A network deployment would need its own authority, managed infrastructure and security review. No external credentials are needed for local demonstration.
+## สาธิตให้กรรมการดู
+
+1. เลือก **เริ่มการสาธิตสำหรับกรรมการ** ที่หน้าเลือกบทบาท หรือเปิด `/#/demo` แล้วกด **เริ่มการสาธิต**
+2. ในบทบาทฟ้า ลองเช็กอิน **เครียด** และ **กังวล** สำรวจวงล้ออารมณ์ แล้วเลือก **SIGNAL** ที่หน้า **สะพานใจ**
+3. เลือก **อยากให้มีคนรับฟัง** และ **ครูพลอย** ข้ามรายละเอียดได้ ตรวจข้อมูลก่อนกด **ส่งคำขอในสาธิต**
+4. สลับเป็นครูพลอย เปิดคำขอใหม่ กดรับเรื่อง แล้วเลือกประโยคจากคู่มือ ปรับข้อความและกดส่งด้วยตัวเอง
+5. กลับเป็นฟ้า เปิดข้อความและขอนัด ครูยืนยันนัดและสร้างการติดตามผล ฟ้าจะเห็นทั้งสองรายการใน **เส้นทางการดูแล**
+6. ลองต่อยอดด้วยความคิดเห็นของฟ้า แผนการดูแล หรือการส่งต่อจำลอง
+
+ปุ่ม **โหมดสาธิต** ที่มุมบนใช้สลับบทบาท เลือกครูสมมติ กลับหน้าหลัก หรือเริ่มใหม่ หากเลือก **เริ่มการสาธิตใหม่** ระบบจะแสดงหน้าต่างยืนยันก่อนคืนข้อมูลชุดแรก
+
+## ข้อมูลชั่วคราวและข้อจำกัด
+
+ทุกการเปลี่ยนแปลงอยู่ในหน่วยความจำของแท็บเดียว การสลับบทบาทเก็บข้อมูลไว้ เมื่อรีเฟรช ปิดแท็บ หรือเริ่มใหม่ ข้อมูลสมมติชุดแรกจะกลับมา บันทึกส่วนตัวและเช็กอินจะเป็นส่วนตัวตั้งแต่เริ่ม ครูเห็นสำเนาที่เลือกแบ่งปันกับตัวละครครูคนนั้น การยกเลิกการแชร์ซ่อนสำเนาในการเปิดดูครั้งต่อไป
+
+การแยกบทบาทในหน้าเว็บเป็นการจำลองสิทธิ์จากฝั่งเบราว์เซอร์ ข้อความ นัดหมาย การส่งต่อ และรายงานเป็นการจำลองทั้งหมด ไมโครโฟนต้องได้รับอนุญาตจากเบราว์เซอร์และทำงานบน HTTPS หรือ localhost มีไฟล์เสียงตัวอย่างที่ติดป้ายกำกับให้ทดลองเล่นได้ในเครื่อง คู่มือและแบบสำรวจใช้เพื่อสะท้อนและเรียนรู้เท่านั้น การใช้งานจริงต้องผ่านการประเมินและออกแบบโดยโรงเรียนร่วมกับผู้เชี่ยวชาญ
+
+MindBridge เป็นเว็บไซต์สาธิต ไม่ใช่บริการฉุกเฉิน ไม่มีเจ้าหน้าที่เฝ้าระวังตลอด 24 ชั่วโมง และไม่สามารถส่งคำขอความช่วยเหลือไปยังบุคคลจริงได้ หากต้องการความช่วยเหลือจริง ให้ติดต่อผู้ใหญ่ที่ไว้วางใจหรือผู้รับผิดชอบของโรงเรียน [กรมสุขภาพจิต](https://checkin.dmh.go.th/contact) · [สถาบันการแพทย์ฉุกเฉินแห่งชาติ](https://www.niems.go.th/1/UploadAttachFile/2025/EBook/421456_20250709121019.pdf)
+
+การต่อยอดระบบจริงอาจเพิ่มการยืนยันตัวตนและสิทธิ์ของแต่ละโรงเรียน เซิร์ฟเวอร์ที่ป้องกันการเข้าถึงข้ามบทบาท การจัดการความยินยอม การเข้ารหัสและจำกัดเวลาจัดเก็บ และขั้นตอนรับมือกรณีเร่งด่วน ต้องทบทวนก่อนเก็บข้อมูลนักเรียนจริง โครงการเสนอรูปแบบค่าบริการสำหรับโรงเรียนหรือสิทธิ์ใช้งานระดับสถาบันโดยไม่ขายข้อมูลนักเรียน
+
+## โครงสร้างและการตรวจสอบ
+
+ใช้ React, TypeScript, Vite, React Router แบบแฮช, Lucide, CSS, SVG, Canvas และฟอนต์ Noto Sans Thai แบบอยู่ในโครงการ สถานะอยู่ใต้ React Context และแชร์ในแท็บเดียว
+
+- `src/pages/` แยกหน้าสาธารณะ แดชบอร์ด การทบทวนของนักเรียน ขั้นตอนข้ามบทบาท และเครื่องมือครู
+- `src/context/` เก็บชุดคำสั่งและสถานะที่ใช้ร่วมกัน
+- `src/data/` ข้อมูลสมมติและเหตุการณ์ตัวอย่าง
+- `src/components/` โครงหน้า องค์ประกอบที่ใช้ซ้ำ และคู่มือสาธิต
+- `public/assets/` ภาพประกอบ ฟอนต์และใบอนุญาต และเสียงประกอบจำลอง
+- `tests/` การทดสอบสถานะและ Playwright
+- `docs/screenshots/` ภาพหน้าจอ PNG สำหรับประกอบโปสเตอร์
+- `.github/workflows/deploy.yml` ขั้นตอนเผยแพร่ GitHub Pages
+
+```sh
+npm run typecheck
+npm run lint
+npm test
+npx playwright install chromium
+npm run test:e2e
+```
+
+Playwright จะเปิดเซิร์ฟเวอร์บนพอร์ต 4173 ให้โดยอัตโนมัติ หากกำหนด `BASE_URL` ระบบจะทดสอบ URL นั้นและใช้ได้กับพาธย่อย เช่น `http://127.0.0.1:4180/mindbridge/` ใช้ `CHROME_PATH` เมื่อต้องการทดสอบกับ Chrome ที่ติดตั้งอยู่แล้ว สำหรับจับภาพอีกครั้งให้เปิด Vite preview แล้วรัน `npm run screenshots` ในอีกเทอร์มินัล
+
+## เผยแพร่บน GitHub Pages
+
+1. เปิด repository บน GitHub หรือสร้าง repository ใหม่ ถ้ามี `origin` อยู่แล้วตรวจด้วย `git remote -v` ถ้ายังไม่มีให้เพิ่ม URL ของ repository ของคุณด้วย `git remote add origin <URL>`
+2. เปิด **Settings → Pages** ที่ repository บน GitHub
+3. ใต้ **Build and deployment** ตั้ง **Source** เป็น **GitHub Actions**
+4. ตรวจงานด้วย `git status --short` แล้วใช้ `git add -A` และ `git commit -m "Build MindBridge static demo"` จากโฟลเดอร์โครงการ คำสั่งจะรวมทั้งไฟล์ใหม่และการลบไฟล์รุ่นก่อน
+5. ส่งสาขา `main` ของคุณด้วย `git push -u origin main`
+6. เปิด **Actions** และตรวจว่า **Deploy MindBridge to GitHub Pages** สำเร็จ เรียกเองได้จาก **Run workflow**
+7. เปิด URL ที่ job `deploy` แสดง เช่น `https://USERNAME.github.io/REPOSITORY-NAME/` การเปิดหน้าโดยตรงใช้ส่วนแฮช เช่น `/#/student/dashboard`
+
+โครงการตั้ง `base: './'` เพื่อรองรับ URL ระดับ repository และระดับโดเมน ใช้ GitHub Actions เพื่อติดตั้งด้วย `npm ci` สร้างเว็บ อัปโหลด `dist/` และเผยแพร่ไปยัง environment `github-pages` ไฟล์ `.nojekyll` ถูกคัดลอกไปด้วยสำหรับกรณีเลือกรูปแบบเผยแพร่จากสาขา
+
+[คู่มือตั้งค่าแหล่งเผยแพร่ GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages) · [คู่มือ GitHub Actions สำหรับ Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+
+### เมื่อเปิดเว็บแล้วพบปัญหา
+
+| อาการ | จุดที่ควรตรวจ |
+| --- | --- |
+| หน้าขาว | เปิดแท็บ **Actions** ตรวจ build และเปิด Console ของเบราว์เซอร์ ตรวจว่าอัปโหลด `dist/` และมี `index.html` ที่ระดับบนสุด |
+| CSS หรือภาพหาย | ตรวจแท็บ Network ให้เส้นทางไฟล์อยู่ใต้พาธของ repository อ้างไฟล์ใน `public/` ด้วย `import.meta.env.BASE_URL` |
+| พาธย่อยผิด | คง `base: './'` ใน Vite ใช้ URL ของเว็บไซต์จาก job ที่เผยแพร่สำเร็จ |
+| เปิดลิงก์หน้าย่อยแล้ว 404 | ลิงก์ต้องมี `/#/` ก่อนเส้นทางของแอป เช่น `/mindbridge/#/teacher/dashboard` |
+| ติดตั้งหรือ build ไม่สำเร็จ | ตรวจเวอร์ชัน Node.js และ npm จากนั้นใช้ `npm ci` จากโฟลเดอร์ที่มี `package-lock.json` แล้วรัน `npm run typecheck` |
