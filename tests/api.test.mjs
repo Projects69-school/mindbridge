@@ -52,6 +52,9 @@ test('a hosted demo uses secure cookies, isolates browsers, and disables local a
   const second = browser(url);
   await first('/healthz', 'GET', undefined, 204);
   await first('/healthz', 'HEAD', undefined, 204);
+  const compressed = await first('/app.js', 'GET', undefined, 200, { headers: { 'Accept-Encoding': 'gzip' } });
+  assert.equal(compressed.response.headers.get('Content-Encoding'), 'gzip');
+  assert.match(await compressed.response.text(), /renderPublic/);
   assert.equal((await first('/register', 'GET', undefined, 302)).response.headers.get('Location'), '/demo');
   assert.equal((await first('/teacher/dashboard', 'GET', undefined, 302)).response.headers.get('Location'), '/demo');
   assert.deepEqual(await get(first, '/api/session'), { user: null, demoOnly: true });

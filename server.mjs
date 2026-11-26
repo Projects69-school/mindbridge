@@ -2,6 +2,8 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { gzip } from 'node:zlib';
+import { promisify } from 'node:util';
 import { createStore } from './db/store.mjs';
 import { bootstrap, getSession, HttpError, removeExpiredWorkspaces, routeApi } from './api.mjs';
 
@@ -14,6 +16,15 @@ const contentTypes = {
 };
 const maximumBody = 3 * 1024 * 1024;
 const writeMethods = new Set(['POST', 'PATCH', 'DELETE']);
+const zip = promisify(gzip);
+const compressible = new Set(['.html', '.css', '.js', '.json', '.svg', '.ttf', '.txt']);
+
+function acceptsGzip(request) {
+  return (request.headers['accept-encoding'] || '').split(',').some(value => {
+    const [coding, weight = ''] = value.trim().split(';');
+    return coding.toLowerCase() === 'gzip' && !/^\s*q\s*=\s*0(?:\.0*)?\s*$/i.test(weight);
+  });
+}
 
 function getCookies(header = '') {
   return Object.fromEntries(header.split(';').map(part => part.trim().split('=')).filter(([name, value]) => ['mb_session', 'mb_demo'].includes(name) && /^[\w-]{32,80}$/.test(value || '')));
@@ -96,8 +107,16 @@ async function servePage(request, response, url, user, demoOnly) {
     if (error.code && error.code !== 'ENOENT' && error.code !== 'ENOTDIR') throw error;
     throw new HttpError(404, 'ไม่พบหน้านี้');
   }
-  response.writeHead(200, { 'Content-Type': contentTypes[extname(target)], 'Content-Length': file.length, 'Cache-Control': extension ? 'public, max-age=300' : 'no-store' });
-  response.end(request.method === 'HEAD' ? undefined : file);
+  const eligible = file.length >= 1024 && compressible.has(extname(target));
+  const compressed = eligible && acceptsGzip(request);
+  const body = compressed ? await zip(file) : file;
+  response.writeHead(200, {
+    'Content-Type': contentTypes[extname(target)], 'Content-Length': body.length,
+    'Cache-Control': extension ? 'public, max-age=300' : 'no-store',
+    ...(eligible ? { Vary: 'Accept-Encoding' } : {}),
+    ...(compressed ? { 'Content-Encoding': 'gzip' } : {}),
+  });
+  response.end(request.method === 'HEAD' ? undefined : body);
 }
 
 export function createApp(options = {}) {

@@ -3,6 +3,7 @@ import { frameworkDetail, publicFooter, publicHeader, renderPublic, roles } from
 
 const app = document.querySelector('#app');
 const guide = document.querySelector('#demo-guide');
+const stylesheets = new Map();
 const navigation = {
   student: [
     ['dashboard','home','หน้าหลัก'], ['emotions','smile','อารมณ์ของฉัน'], ['emotion-wheel','compass','วงล้ออารมณ์'],
@@ -99,6 +100,25 @@ function pageError(message) {
   return `<div class="card page-error"><span class="icon-tile lavender">${icon('help')}</span><h1>เปิดหน้านี้ไม่ได้</h1><p>${esc(message)}</p><button type="button" class="btn btn-secondary" data-retry>ลองใหม่</button></div>`;
 }
 
+function loadWorkspaceStyles(role) {
+  const file = role === 'student' ? '/student.css' : '/teacher.css';
+  if (!stylesheets.has(file)) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = file;
+    stylesheets.set(file, new Promise(resolve => {
+      link.addEventListener('load', resolve, { once:true });
+      link.addEventListener('error', () => {
+        stylesheets.delete(file);
+        link.remove();
+        resolve();
+      }, { once:true });
+    }));
+    document.head.append(link);
+  }
+  return stylesheets.get(file);
+}
+
 async function render({ focus = false } = {}) {
   const id = ++renderCount;
   const path = location.pathname.replace(/\/+$/,'') || '/';
@@ -114,7 +134,10 @@ async function render({ focus = false } = {}) {
     if (!user) return navigate(signIn, { replace:true });
     if (user.role !== role) return navigate(locationAfterAuth(user), { replace:true });
     try {
-      module = role === 'student' ? await import('./student.js') : await import('./teacher.js');
+      [module] = await Promise.all([
+        role === 'student' ? import('./student.js') : import('./teacher.js'),
+        loadWorkspaceStyles(role),
+      ]);
       const renderer = role === 'student' ? module.renderStudent : role === 'teacher' ? module.renderTeacher : module.renderAdmin;
       main = await renderer(modulePath);
     } catch (error) {
